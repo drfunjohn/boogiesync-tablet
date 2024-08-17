@@ -25,6 +25,7 @@ if len(service_matches) == 0:
     sys.exit(0)
 
 first_match = service_matches[0]
+print(f"Available services:{service_matches}")
 port = first_match["port"]
 name = first_match["name"]
 host = first_match["host"]
@@ -32,18 +33,24 @@ host = first_match["host"]
 print("connecting to \"%s\" on %s" % (name, host))
 
 # Create the client socket
-sock=BluetoothSocket( RFCOMM )
-sock.connect((host, port))
+sock=BluetoothSocket( Protocols.RFCOMM )
+print(f"connect to:{host}:{port}")
+try:
+    sock.connect((host, port))
+except Exception as e:
+    print(f"Cannot connect to {name}:{e}")
+    sys.exit(1)
+
 
 print("connected")
-resp = '\xc0\x00\x00\xb8\xf0\xc0'
-payload = '\xc0\x00\x53\x05\x05\x00\x04\x10\x71\xc0'
+resp = b'\xc0\x00\x00\xb8\xf0\xc0'
+payload = b'\xc0\x00\x53\x05\x05\x00\x04\x10\x71\xc0'
 sock.send(payload)
-sock.send('\xc0')
+sock.send(b'\xc0')
 data = sock.recv(1024)
 if resp == data:
     print("good response")
-    sock.send('\xc0')
+    sock.send(b'\xc0')
 else:
     sys.exit(1)
 
